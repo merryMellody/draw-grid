@@ -70,8 +70,6 @@ body {
 
 #backgroundCanvas {
   position: absolute;
-  border: 5px solid black;
-  border-radius: 1%;
   background-color: white;
   z-index: 0;
 }

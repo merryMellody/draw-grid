@@ -1,6 +1,7 @@
 <template>
   <canvas
     id="gridCanvas"
+    ref="gridCanvas"
     v-bind:width="appWidth + 'px'"
     v-bind:height="appHeight + 'px'"
   ></canvas>
@@ -21,7 +22,7 @@ export default {
     gridSize: {
       type: Number,
       default: 80,
-    }
+    },
   },
   data() {
     return {
@@ -69,7 +70,7 @@ export default {
     },
   },
   mounted() {
-    const gridCanvas = document.querySelector("#gridCanvas");
+    const gridCanvas = this.$refs.gridCanvas;
     this.gridCtx = gridCanvas.getContext("2d");
 
     this.$nextTick(() => {
@@ -82,9 +83,7 @@ export default {
 <style>
 #gridCanvas {
   position: absolute;
-  border: 5px solid black;
-  border-radius: 1%;
-  z-index: 20;
+  z-index: 10;
   cursor: crosshair;
 }
 </style>
