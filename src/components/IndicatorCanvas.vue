@@ -4,9 +4,12 @@
     ref="indicatorCanvas"
     v-bind:width="appWidth + 'px'"
     v-bind:height="appHeight + 'px'"
+    @touchmove="handleTouchMove"
+    @touchstart="handleTouchStart"
+    @touchend="handleTouchEnd"
     @mousemove="handleMouseMove"
-    @mousedown="handleMouseDown()"
-    @mouseup="handleMouseUp()"
+    @mousedown="handleMouseDown"
+    @mouseup="handleMouseUp"
   ></canvas>
 </template>
 
@@ -39,6 +42,7 @@ export default {
         y: -1,
       },
       mouseDown: false,
+      touchDown: false,
     };
   },
   methods: {
@@ -56,7 +60,9 @@ export default {
         y: gridY,
       };
 
-      requestAnimationFrame(this.drawIndicators);
+      this.$nextTick(() => {
+        this.drawIndicators();
+      });
     },
     handleMouseDown() {
       this.mouseDown = true;
@@ -66,12 +72,75 @@ export default {
         y: this.gridPos.y,
       };
 
-      requestAnimationFrame(this.drawIndicators);
+      this.$nextTick(() => {
+        this.drawIndicators();
+      });
     },
     handleMouseUp() {
       this.mouseDown = false;
 
-      requestAnimationFrame(this.drawIndicators);
+      this.$nextTick(() => {
+        this.drawIndicators();
+      });
+    },
+    handleTouchMove(e) {
+      e.preventDefault();
+
+      const relativeX =
+        e.touches[0].pageX - this.$refs.indicatorCanvas.offsetLeft - 9;
+      const relativeY =
+        e.touches[0].pageY - this.$refs.indicatorCanvas.offsetLeft - 9;
+
+      const { x: gridX, y: gridY } = this.retrieveGridCoord(
+        relativeX,
+        relativeY
+      );
+
+      this.gridPos = {
+        x: gridX,
+        y: gridY,
+      };
+
+      this.$nextTick(() => {
+        this.drawIndicators();
+      });
+    },
+    handleTouchStart(e) {
+      e.preventDefault();
+
+      this.touchDown = true;
+
+      const relativeX =
+        e.touches[0].pageX - this.$refs.indicatorCanvas.offsetLeft - 9;
+      const relativeY =
+        e.touches[0].pageY - this.$refs.indicatorCanvas.offsetLeft - 9;
+
+      const { x: gridX, y: gridY } = this.retrieveGridCoord(
+        relativeX,
+        relativeY
+      );
+
+      this.gridPos = {
+        x: gridX,
+        y: gridY,
+      };
+
+      this.gridFirstPos = {
+        x: gridX,
+        y: gridY,
+      };
+
+      this.$nextTick(() => {
+        this.drawIndicators();
+      });
+    },
+    handleTouchEnd(e) {
+      e.preventDefault();
+
+      this.touchDown = false;
+      this.$nextTick(() => {
+        this.drawIndicators();
+      });
     },
     retrieveGridCoord(mouseX, mouseY) {
       const gridX = Math.floor(mouseX / this.gridSize);
@@ -114,7 +183,7 @@ export default {
     drawIndicators() {
       this.indicatorCtx.clearRect(0, 0, this.appWidth, this.appHeight);
 
-      if (this.mouseDown) {
+      if (this.mouseDown || this.touchDown) {
         const drawStartX =
           this.gridPos.x >= this.gridFirstPos.x
             ? this.gridFirstPos.x
